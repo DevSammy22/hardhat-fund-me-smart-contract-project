@@ -1,11 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
-//import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "./PriceConverter.sol";
 error NotOwner();
 
 contract FundMe{
+      // Type Declarations
     using PriceConverter for uint256;
+    
+    //State variables
+    event Funded(address indexed from, uint256 amount);
     uint256 public constant MINIMUM_USD = 5 * 10 ** 18; //or 50 * 1e18;
     //constant and immutable are gas optimiation tools
     //The difference between constant and immutable is that:
@@ -15,24 +19,27 @@ contract FundMe{
     //23,515 gas - non-constant
     //21,415 * 141000000000 = $9.058545
     //23,515 * 141000000000 = $9.946845
-
+   
     address[] public funders;
     mapping(address => uint256) public addressToAmountFunded;
     // Could we make this constant?  /* hint: no! We should make it immutable! */
     address public /* immutable */ i_owner; //i_owner - the style of names shows that the variable is immutable //This is to set the owner of the contract
     //21,508 gas - immutable
     //23,644 gas - non-immutable
+     AggregatorV3Interface public i_priceFeed;
 
-    constructor(){
+    constructor(address priceFeedAddress){
         i_owner = msg.sender;
+        i_priceFeed = AggregatorV3Interface(priceFeedAddress);
     }
 
     function fund() public payable{
         //Want to be able to set a minimum fund amount in USD
         //We converted ethereum to usd as shown below (this is possible using chainlink and oracle)
-        require(msg.value.getConversionRate() >= MINIMUM_USD, "Didn't send enough!"); //1e18 == 1*10**18
-        funders.push(msg.sender);
+        require(msg.value.getConversionRate(i_priceFeed) >= MINIMUM_USD, "Didn't send enough!"); //1e18 == 1*10**18
         addressToAmountFunded[msg.sender] += msg.value; //We increase the amount once the account is funded
+        funders.push(msg.sender);
+        //emit Funded(msg.sender, msg.value);
         //msg.value(uint) indicates how much ETH or blockchain currency we send i.e the number of wei sent with the message
         //msg.sender(address) indicates the address of the sender
         //keyword payable makes fund function red.
@@ -75,12 +82,17 @@ contract FundMe{
         //Below are ways we send or tranfer ether:
         //Transfer
         //payable(msg.sender).transfer(address(this).balance); //It returns nothing. It authomatically revert the amountthis keyword means everything in the contract above.
+        
         //Send
         //bool sendSuccess = payable(msg.sender).send(address(this).balance); //It returns bool;
         //require(sendSuccess, "Send failed");
+        
         //Call
+        // (bool success, ) = i_owner.call{value: address(this).balance}("");
+        // require(success);
         (bool callSuccess, ) = payable(msg.sender).call{value: address(this).balance}("");
         require(callSuccess, "Call failed");
+
     }
     
     modifier onlyOwner{
