@@ -8,7 +8,7 @@ require("solidity-coverage");
 require("hardhat-gas-reporter");
 require("hardhat-deploy");
 
-const GOERLI_RPC_URL = process.env.GOERLI_RPC_URL || "https";
+const GOERLI_RPC_URL = process.env.GOERLI_RPC_URL;
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
 const COINMARKETCAP_API_KEY = process.env.COINMARKETCAP_API_KEY;
@@ -20,6 +20,7 @@ module.exports = {
             url: GOERLI_RPC_URL,
             accounts: [PRIVATE_KEY],
             chainId: 5,
+            blockConfirmations: 6,
         },
         localhost: {
             url: "http://127.0.0.1:8545/", //LocalHost is different from Hardhart networks
@@ -40,7 +41,7 @@ module.exports = {
         apiKey: ETHERSCAN_API_KEY,
     },
     gasReporter: {
-        enabled: true,
+        enabled: false,
         outputFile: "gas-report.txt",
         noColors: true,
         currency: "USD",
