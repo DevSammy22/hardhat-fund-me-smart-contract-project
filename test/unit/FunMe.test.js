@@ -14,7 +14,7 @@ describe("FundMe", async function () {
         await deployments.fixture(["all"]);
         fundMe = await ethers.getContract("FundMe", deployer); //Here we connect the deployer to fundMe i.e. whenever we call any function with fundMe, it would be automatically be from deployer account
         mockV3Aggregator = await ethers.getContract(
-            "mockV3Aggregator",
+            "MockV3Aggregator",
             deployer
         );
     });
