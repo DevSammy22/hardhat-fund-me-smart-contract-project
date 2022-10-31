@@ -110,7 +110,7 @@ describe("FundMe", async function () {
             const endingDeployerBalance = await fundMe.provider.getBalance(
                 deployer
             );
-
+            //Assert
             //Assert
             assert.equal(endingFundMeBalance, 0);
             assert.equal(
