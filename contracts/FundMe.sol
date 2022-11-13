@@ -14,25 +14,25 @@ contract FundMe {
     // Type Declarations
     using PriceConverter for uint256;
 
-    //State variables
+    //State variable
     event Funded(address indexed from, uint256 amount);
     uint256 public constant MINIMUM_USD = 5 * 10**18; //or 50 * 1e18;
-    address[] public funders;
-    mapping(address => uint256) public addressToAmountFunded;
-    address public /*immutable*/ owner;
-    AggregatorV3Interface public priceFeed;
+    address[] private s_funders;
+    mapping(address => uint256) private s_addressToAmountFunded;
+    address private immutable i_owner;
+    AggregatorV3Interface public s_priceFeed;
 
     modifier onlyOwner() {
         //require(msg.sender == i_owner, "Sender is not owner");
-        if (msg.sender != owner) {
+        if (msg.sender != i_owner) {
             revert FundMe__NotOwner();
         } //thi is more gas-efficient
         _; //This means the rest of the code should be executed if the condition above is met;
     }
 
-    constructor(address priceFeedAddress) {
-        owner = msg.sender;
-        priceFeed = AggregatorV3Interface(priceFeedAddress);
+    constructor(address s_priceFeedAddress) {
+        i_owner = msg.sender;
+        s_priceFeed = AggregatorV3Interface(s_priceFeedAddress);
     }
 
     /**
@@ -41,20 +41,20 @@ contract FundMe {
      */
     function fund() public payable {
         require(
-            msg.value.getConversionRate(priceFeed) >= MINIMUM_USD,
+            msg.value.getConversionRate(s_priceFeed) >= MINIMUM_USD,
             "Didn't send enough! You need to spend more ETH"
         );
-        addressToAmountFunded[msg.sender] += msg.value; //We increase the amount once the account is funded
-        funders.push(msg.sender);
+        s_addressToAmountFunded[msg.sender] += msg.value; //We increase the amount once the account is funded
+        s_funders.push(msg.sender);
     }
 
     function withdraw() public onlyOwner {
-        for (uint256 i = 0; i < funders.length; i++) {
-            address funder = funders[i];
-            addressToAmountFunded[funder] = 0;
+        for (uint256 i = 0; i < s_funders.length; i++) {
+            address funder = s_funders[i];
+            s_addressToAmountFunded[funder] = 0;
         }
         //reset the array
-        funders = new address[](0);
+        s_funders = new address[](0);
         //Below are ways we send or tranfer ether:
         //Transfer
         //payable(msg.sender).transfer(address(this).balance); //It returns nothing. It authomatically revert the amount. "this" keyword means everything in the contract above.
@@ -66,9 +66,29 @@ contract FundMe {
         //Call
         // (bool success, ) = i_owner.call{value: address(this).balance}("");
         // require(success);
-        (bool callSuccess, ) = payable(msg.sender).call{
+        (bool success, ) = payable(msg.sender).call{
             value: address(this).balance
         }("");
-        require(callSuccess, "Transfer failed");
+        require(success, "Transfer failed");
+    }
+
+    function getOwner() public view returns (address) {
+        return i_owner;
+    }
+
+    function getFunder(uint256 index) public view returns (address) {
+        return s_funders[index];
+    }
+
+    function getAddressToAmountFunded(address funder)
+        public
+        view
+        returns (uint256)
+    {
+        return s_addressToAmountFunded[funder];
+    }
+
+    function getPriceFeed() public view returns (AggregatorV3Interface) {
+        return s_priceFeed;
     }
 }
