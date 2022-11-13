@@ -1,7 +1,5 @@
 # Hardhat Fund Me
 
-[Full Repo](https://github.com/smartcontractkit/full-blockchain-solidity-course-js)
-
 - [Hardhat Fund Me](#hardhat-fund-me)
 - [Getting Started](#getting-started)
   - [Requirements](#requirements)
@@ -18,7 +16,6 @@
 - [Formatting](#formatting)
 - [Thank you!](#thank-you)
 
-This project is apart of the Hardhat FreeCodeCamp video.
 
 # Getting Started
 
