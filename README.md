@@ -1,4 +1,4 @@
-# Hardhat Fund Me
+# Hardhat Fund Me Smart Contract Project
 
 - [Hardhat Fund Me](#hardhat-fund-me)
 - [Getting Started](#getting-started)
